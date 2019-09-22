@@ -1,120 +1,127 @@
-function [diff1, diff2] = calculate_diff(wolves,color_space,neighbor)
+function [diff1, diff2] = calculate_diff(image,color_space,neighbor)
 %This function takes the image, selected color space and type of neighbors
 %as input and outputs the squared difference depending on the selected type
 
+%Note - the calculation for squared difference has been vectorized to avoid
+%lengthy loops and save some time. 
+
 %   Detailed explanation goes here
-    [ht ,wd, col] = size(wolves);
-    switch(color_space)
+    [ht ,wd, col] = size(image); %size of input image. 
+    switch(color_space) %select color space. Different computation of difference for each color space
         case 'RGB'
+            %plot original image and it's histogram
             subplot(211);
-            imshow(wolves);
-            subplot(212)
-            bar(imhist(wolves(:,:,1)), 'r'); hold on;
-            bar(imhist(wolves(:,:,2)), 'g'); hold on;
-            bar(imhist(wolves(:,:,3)), 'b'); hold on; legend('Red channel', 'Green Channel', 'Blue Channel'); hold off;
+            imshow(image);
+            subplot(212);
+            bar(imhist(image(:,:,1)), 'r'); hold on;
+            bar(imhist(image(:,:,2)), 'g'); hold on;
+            bar(imhist(image(:,:,3)), 'b'); hold on; legend('Red channel', 'Green Channel', 'Blue Channel'); hold off;
             switch(neighbor)
                 case 4
                     %for neighbors (x,y) and (x+1,y) 
-                    wolves_x1 = [wolves(:,2:end, :) zeros(ht,1,col)];
-                    diff = (wolves-wolves_x1).^2;
-                    diff1 = diff(:,:,1)+diff(:,:,2)+diff(:,:,3);
+                    img_x1 = [image(:,2:end, :) zeros(ht,1,col)]; %consider the image from column 2 and later 
+                    diff = (image-img_x1).^2; %calculate squared difference between original image and image in img_x1
+                    diff1 = diff(:,:,1)+diff(:,:,2)+diff(:,:,3); %add difference for rgb. (Sum of squared difference)
                     %for neighbors (x,y) and (x,y+1)
-                    wolves_y1 = [wolves(2:end,:, :) ;zeros(1,wd,col)];
-                    diff = (wolves-wolves_y1).^2;
-                    diff2 = diff(:,:,1)+diff(:,:,2)+diff(:,:,3);
+                    img_y1 = [image(2:end,:, :) ;zeros(1,wd,col)]; %consider image from row 2 and later
+                    diff = (image-img_y1).^2;   %calculate squared diff between original image and img_y1
+                    diff2 = diff(:,:,1)+diff(:,:,2)+diff(:,:,3); %sum of squared differences
                 case 8
                     %for neighbors (x,y) and (x+1, y+1)
-                    wolves_x1 = [wolves(2:end,2:end, :) zeros(ht-1,1,col); zeros(1, wd, col)];
-                    diff = (wolves-wolves_x1).^2;
-                    diff1 = diff(:,:,1)+diff(:,:,2)+diff(:,:,3);
+                    img_x1 = [image(2:end,2:end, :) zeros(ht-1,1,col); zeros(1, wd, col)]; %create image for x+1, y+1
+                    diff = (image-img_x1).^2; %calculate difference 
+                    diff1 = diff(:,:,1)+diff(:,:,2)+diff(:,:,3); %sum of squared difference
                     %for neighbors (x,y) and (x-1, y-1)
-                    wolves_y1 = zeros(ht, wd, col, 'uint8');
-                    wolves_y1(2:end,2:end,:) = wolves(1:end-1,1:end-1, :);
-                    diff = (wolves-wolves_y1).^2;
-                    diff2 = diff(:,:,1)+diff(:,:,2)+diff(:,:,3);
+                    img_y1 = zeros(ht, wd, col, 'uint8');   
+                    img_y1(2:end,2:end,:) = image(1:end-1,1:end-1, :); %create image for x-1, y-1 
+                    diff = (image-img_y1).^2;   %squared difference 
+                    diff2 = diff(:,:,1)+diff(:,:,2)+diff(:,:,3);    %sum of squared difference
                 otherwise
                     disp('Please select 4/ 8 neighbor pairs');
             end
         case 'Grayscale'
-            wolves_gray = rgb2gray(wolves);
-            subplot(211);
-            imshow(wolves_gray);
-            subplot(212)
-            imhist(wolves_gray);
+            img_gray = rgb2gray(image); %convert to grayscale
+            %plot grayscale image and histogram
+            subplot(211); 
+            imshow(img_gray);
+            subplot(212); 
+            imhist(img_gray);
+            %choose between neighbors
             switch(neighbor)
                 case 4
                     %for neighbors (x,y) and (x+1,y) 
-                    wolves_gray_x1 = [wolves_gray(:, 2:end) zeros(ht,1)];
-                    diff1 = (wolves_gray-wolves_gray_x1).^2;
+                    img_gray_x1 = [img_gray(:, 2:end) zeros(ht,1)]; %x+1, y - image
+                    diff1 = (img_gray-img_gray_x1).^2;  %squared difference between 'intensities'
                     %for neighbors (x,y) and (x,y+1) 
-                    wolves_gray_y1 = [wolves_gray(2:end, :); zeros(1, wd)];
-                    diff2 = (wolves_gray-wolves_gray_y1).^2;
+                    img_gray_y1 = [img_gray(2:end, :); zeros(1, wd)];   
+                    diff2 = (img_gray-img_gray_y1).^2;  %squared difference between intensities 
                 case 8
                     %for neighbors (x,y) and (x+1,y+1) 
-                    wolves_gray_x1 = [wolves_gray(2:end, 2:end) zeros(ht-1,1); zeros(1,wd)];
-                    diff1 = (wolves_gray-wolves_gray_x1).^2;
+                    img_gray_x1 = [img_gray(2:end, 2:end) zeros(ht-1,1); zeros(1,wd)];
+                    diff1 = (img_gray-img_gray_x1).^2;  %squared difference between intensities
                     %for neighbors (x,y) and (x-1,y-1) 
-                    wolves_gray_y1 = zeros(ht, wd, 'uint8');
-                    wolves_gray_y1(2:end, 2:end) = wolves_gray(1:end-1, 1:end-1);
-                    diff2 = (wolves_gray-wolves_gray_y1).^2;
+                    img_gray_y1 = zeros(ht, wd, 'uint8');
+                    img_gray_y1(2:end, 2:end) = img_gray(1:end-1, 1:end-1);
+                    diff2 = (img_gray-img_gray_y1).^2;  %squared difference between intensities
                 otherwise
                     disp('Please select 4/ 8 neighbor pairs');
             end
         case 'HSV'
-            wolves_hsv = rgb2hsv(wolves);
-            subplot(211);
-            imshow(wolves_hsv);
-            subplot(212)
-            bar(imhist(wolves_hsv(:,:,1)), 'y'); hold on;
-            bar(imhist(wolves_hsv(:,:,2)), 'm'); hold on;
-            bar(imhist(wolves_hsv(:,:,3)), 'c'); hold on; legend('Hue', 'Saturation', 'Value'); hold off;
+            img_hsv = rgb2hsv(image); %convert to hsv
+            %plot hsv image and histogram 
+            subplot(211); 
+            imshow(img_hsv);
+            subplot(212); 
+            bar(imhist(img_hsv(:,:,1)), 'y'); hold on;
+            bar(imhist(img_hsv(:,:,2)), 'm'); hold on;
+            bar(imhist(img_hsv(:,:,3)), 'c'); hold on; legend('Hue', 'Saturation', 'Value'); hold off;
             switch(neighbor)
                 case 4
                     %for neighbors (x,y) and (x+1,y) 
-                    wolves_hsv_x1 = [wolves_hsv(:, 2:end,3) zeros(ht,1)];
-                    diff1 = (wolves_hsv-wolves_hsv_x1).^2;
+                    img_hsv_x1 = [img_hsv(:, 2:end,3) zeros(ht,1)];
+                    diff1 = (img_hsv-img_hsv_x1).^2;    %squared difference between neighboring 'values'
                     %for neighbors (x,y) and (x,y+1) 
-                    wolves_hsv_y1 = [wolves_hsv(2:end, :,3); zeros(1, wd)];
-                    diff2 = (wolves_hsv-wolves_hsv_y1).^2;
+                    img_hsv_y1 = [img_hsv(2:end, :,3); zeros(1, wd)];   %squared difference between neighboring 'values'
+                    diff2 = (img_hsv-img_hsv_y1).^2;
                 case 8
                     %for neighbors (x,y) and (x+1,y+1) 
-                    wolves_hsv_x1 = [wolves_hsv(2:end, 2:end,3) zeros(ht-1,1); zeros(1,wd)];
-                    diff1 = (wolves_hsv-wolves_hsv_x1).^2;
+                    img_hsv_x1 = [img_hsv(2:end, 2:end,3) zeros(ht-1,1); zeros(1,wd)];  
+                    diff1 = (img_hsv-img_hsv_x1).^2;    %squared difference between neighboring 'values'
                     %for neighbors (x,y) and (x-1,y-1) 
-                    wolves_hsv_y1 = zeros(ht, wd, 'double');
-                    wolves_hsv_y1(2:end, 2:end,3) = wolves_hsv(1:end-1, 1:end-1,3);
-                    diff2 = (wolves_hsv-wolves_hsv_y1).^2;
+                    img_hsv_y1 = zeros(ht, wd, 'double');
+                    img_hsv_y1(2:end, 2:end,3) = img_hsv(1:end-1, 1:end-1,3);   
+                    diff2 = (img_hsv-img_hsv_y1).^2;    %squared difference between neighboring 'values'
                 otherwise
                     disp('Please select 4/ 8 neighbor pairs');
             end
         case 'La*b*'
-            wolves_lab = rgb2lab(wolves);
-            subplot(211);
-            imshow(wolves_lab);
-            subplot(212)
-            bar(imhist(wolves_lab(:,:,1)), 'm'); hold on;
-            bar(imhist(wolves_lab(:,:,2)), 'g'); hold on;
-            bar(imhist(wolves_lab(:,:,3)), 'c'); hold on; legend('L', 'a*', 'b*'); hold off;
+            img_lab = rgb2lab(image);   %convert to La*b*
+            %plot La*b* image and its histogram
+            subplot(211); 
+            imshow(img_lab);
+            subplot(212); 
+            bar(imhist(img_lab(:,:,1)), 'm'); hold on;
+            bar(imhist(img_lab(:,:,2)), 'g'); hold on;
+            bar(imhist(img_lab(:,:,3)), 'c'); hold on; legend('L', 'a*', 'b*'); hold off;
             switch(neighbor)
                 case 4
                     %for neighbors (x,y) and (x+1,y) 
-                    wolves_lab_x1 = [wolves_lab(:, 2:end,1) zeros(ht,1)];
-                    diff1 = (wolves_lab-wolves_lab_x1).^2;
+                    img_lab_x1 = [img_lab(:, 2:end,1) zeros(ht,1)];
+                    diff1 = (img_lab-img_lab_x1).^2;    %squared difference between neighboring 'lightness' values
                     %for neighbors (x,y) and (x,y+1) 
-                    wolves_lab_y1 = [wolves_lab(2:end, :,1); zeros(1, wd)];
-                    diff2 = (wolves_lab-wolves_lab_y1).^2;
+                    img_lab_y1 = [img_lab(2:end, :,1); zeros(1, wd)];
+                    diff2 = (img_lab-img_lab_y1).^2;    %squared difference between neighboring 'lightness' values
                 case 8
                     %for neighbors (x,y) and (x+1,y+1) 
-                    wolves_lab_x1 = [wolves_lab(2:end, 2:end,1) zeros(ht-1,1); zeros(1,wd)];
-                    diff1 = (wolves_lab-wolves_lab_x1).^2;
+                    img_lab_x1 = [img_lab(2:end, 2:end,1) zeros(ht-1,1); zeros(1,wd)];
+                    diff1 = (img_lab-img_lab_x1).^2;    %squared difference between neighboring 'lightness' values
                     %for neighbors (x,y) and (x-1,y-1) 
-                    wolves_lab_y1 = zeros(ht, wd, 'double');
-                    wolves_lab_y1(2:end, 2:end,3) = wolves_lab(1:end-1, 1:end-1,3);
-                    diff2 = (wolves_lab-wolves_lab_y1).^2;
+                    img_lab_y1 = zeros(ht, wd, 'double');
+                    img_lab_y1(2:end, 2:end,3) = img_lab(1:end-1, 1:end-1,3);
+                    diff2 = (img_lab-img_lab_y1).^2;    %squared difference between neighboring 'lightness' values
                 otherwise
                     disp('Please select 4/ 8 neighbor pairs');
             end
         otherwise
     end
 end
-

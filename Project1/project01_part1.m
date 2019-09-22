@@ -1,12 +1,19 @@
+%ECE558 - Digital Imaging Systems 
+%Project 1. Question 1. 
+%Visualising the smoothness prior of an image. 
+%Mayuresh Sardesai 
+%200320514
+
 clc; close all; 
-tic;
-wolves = imread('wolves.png'); 
-color_space = input('Which color space you want to consider\na. RGB\nb. Grayscale\nc. HSV\nd. La*b*\n', 's');
-% sel_col_spc = select_color_space(color_space, wolves);
-% disp_images(wolves, wolves_gray, wolves_hsv, wolves_lab);
-% figure; 
-% disp_og_hist(wolves, wolves_gray, wolves_hsv, wolves_lab);
-neighbor_type = input('Which neighbor type you want to consider\na. 4 - Neighbors\nb. 8 - Neighbors\n'); 
-[diff1, diff2] = calculate_diff(wolves, color_space, neighbor_type);
+tic; %start timer to record runtime
+wolves = imread('lena.jpg'); %read image
+prompt1 = 'Which color space you want to consider\na. RGB\nb. Grayscale\nc. HSV\nd. La*b*\n';
+color_space = input(prompt1, 's'); %ask the user to select color space
+prompt2 = ['Which neighbor type you want to consider'...
+    '\na. 4 - Neighbors -(x,y) and (x+1,y) , (x,y) and (x,y+1)\n'...
+    'b. 8/d - Neighbors (x,y) and (x+1, y+1) ,(x,y) and (x-1, y-1)\n'];
+neighbor_type = input(prompt2); %ask the user to select the neighbors
+[diff1, diff2] = calculate_diff(wolves, color_space, neighbor_type); %compute squared difference between the neighbors
 figure;
-visualize_diff_hist(diff1, diff2);toc;
+visualize_diff_hist(diff1, diff2); %visualize the difference using the histogram and the subtracted image. 
+toc;
