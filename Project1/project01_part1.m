@@ -6,7 +6,8 @@
 
 clc; close all; 
 tic; %start timer to record runtime
-wolves = imread('lena.jpg'); %read image
+wolves = imread('Hunt.jpg'); %read image
+wolves = im2double(wolves); %convert to double to avoid clipping during subtraction
 prompt1 = 'Which color space you want to consider\na. RGB\nb. Grayscale\nc. HSV\nd. La*b*\n';
 color_space = input(prompt1, 's'); %ask the user to select color space
 prompt2 = ['Which neighbor type you want to consider'...

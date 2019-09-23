@@ -6,12 +6,14 @@ function [] = visualize_diff_hist(diff1, diff2)
     title('Difference Image for first pair of neighbors');
     subplot(2,2,2); 
     imhist(diff1);  %show difference histogram for the first pair of neighbors
+%     xlim([min(min(diff1)) max(max(diff1))]);
     title('Difference Histogram for first pair of neighbors');
     subplot(2,2,3); 
     imshow(diff2);  %show difference image for the second pair of neighbors
-    title('Difference Image for first pair of neighbors');
+    title('Difference Image for second pair of neighbors');
     subplot(2,2,4); 
     imhist(diff2);  %show difference histogram for the second pair of neighbors
-    title('Difference Histogram for first pair of neighbors');
+%     xlim([min(min(diff1)) max(max(diff1))]);
+    title('Difference Histogram for second pair of neighbors');
 end
 
