@@ -70,25 +70,42 @@ if __name__ == '__main__':
                                and img_ex[i+1+n1][j+1+n2] in v):    #all conditions to check validity of 4 neighbors
                                 graph[(i,j)].add((i+n1,j+n2))            
                     if neighbor_type == '8':    #if 8 neighbors specified by the user 
-                                for n1 in range(-1,2): 
-                                    for n2 in range(-1, 2):
-                                        if((i+n1!=i or j+n2!=j) and (0<=i+n1<=ht) \
-                                           and (0<=i+n2<=wd) and img_ex[i+1+n1][j+1+n2] in v):
-                                            graph[(i,j)].add((i+n1,j+n2))   #all conditions to check validity 
+                        for n1 in range(-1,2): 
+                            for n2 in range(-1, 2):
+                                if((i+n1!=i or j+n2!=j) and (0<=i+n1<=ht) \
+                                   and (0<=i+n2<=wd) and img_ex[i+1+n1][j+1+n2] in v):
+                                    graph[(i,j)].add((i+n1,j+n2))   #all conditions to check validity 
                     if neighbor_type == 'm':    #if neighbor type - m neighbors 
-                        adjacents = {(-1,0),(0,1),(1,0),(0,-1)}
-                        for n1, n2 in adjacents:
-                            if((i+n1!=i or j+n2!=j) and (0<=i+n1<=ht) \
-                               and (0<=i+n2<=wd) and (i+n1!=i+n2) and (i+n1!=-(i+n2))\
-                               and img_ex[i+1+n1][j+1+n2] in v):
-                                graph[(i,j)].add((i+n1,j+n2))  
-                            elif((img_ex[i+1+n1][j+1+n2] not in v)):
-                                adjacents={(-1,-1),(-1,1),(1,-1),(1,1)}
-                                for d1, d2 in adjacents:
-                                    if((i+d1!=i or j+d2!=j) and (0<=i+d1<=ht) \
-                                       and (0<=i+d2<=wd) and (i+n1!=i+d2) and (i+d1!=-(i+d2))\
-                                       and img_ex[i+1+d1][j+1+d2] in v):
-                                        graph[(i,j)].add((i+d1,j+d2))  
+                        n4 = [(-1,0),(0,1),(1,0),(0,-1)]
+                        diag = [(-1,-1),(-1,1),(1,-1),(1,1)]
+                        for d in range(len(diag)):  #check diagonals first
+                            d1,d2 = diag[d]
+                            if((0<=i+d1<=ht) and (0<=i+d2<=wd)\
+                               and img_ex[i+1+d1][j+1+d2] in v):
+                                if(d==0 and (img_ex[i+1+d1+n4[1][0]][j+1+d2+n4[1][1]] not in v and d==0 \
+                                             and (img_ex[i+1+d1+n4[2][0]][j+1+d2+n4[2][1]] not in v))):   #check their 4 neighbors
+                                    graph[(i,j)].add((i+d1,j+d2))
+                                    continue
+                                if(d==1 and (img_ex[i+1+d1+n4[2][0]][j+1+d2+n4[2][1]] not in v) and\
+                                   d==1 and (img_ex[i+1+d1+n4[3][0]][j+1+d2+n4[3][1]] not in v)):
+                                    graph[(i,j)].add((i+d1,j+d2))
+                                    continue
+                                if(d==2 and (img_ex[i+1+d1+n4[0][0]][j+1+d2+n4[0][1]] not in v) and\
+                                   d==2 and (img_ex[i+1+d1+n4[1][0]][j+1+d2+n4[1][1]] not in v)):
+                                    graph[(i,j)].add((i+d1,j+d2))
+                                    continue
+                                if(d==3 and (img_ex[i+1+d1+n4[3][0]][j+1+d2+n4[3][1]] not in v) and\
+                                   d==3 and (img_ex[i+1+d1+n4[0][0]][j+1+d2+n4[0][1]] not in v)):
+                                    graph[(i,j)].add((i+d1,j+d2))
+                                    continue
+                            else:
+                                adjacents = {(-1,0),(0,1),(1,0),(0,-1)} #4 neighbors defined by the following list
+                                for n1, n2 in adjacents:
+                                    if((i+n1!=i or j+n2!=j) and (0<=i+n1<=ht) \
+                                       and (0<=i+n2<=wd) and (i+n1!=i+n2) and (i+n1!=-(i+n2))\
+                                       and img_ex[i+1+n1][j+1+n2] in v):    #all conditions to check validity of 4 neighbors
+                                        graph[(i,j)].add((i+n1,j+n2))
+                                
                 except IndexError:
                     continue              
 
