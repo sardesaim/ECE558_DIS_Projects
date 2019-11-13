@@ -1,16 +1,27 @@
-function [blendedImg] = blendPyramid(bg, fg, bw_mask)
-%BLENDPYRAMID Summary of this function goes here
-%   Detailed explanation goes here
-    [~, lPyrBG] = ComputePyr(bg, 15);
-    [~, lPyrFG] = ComputePyr(fg, 15);
-    [gPyrMask,~] = ComputePyr(bw_mask, 15);
+function [blendedImg] = blendPyramid(bg, fg, bw_mask, nlayers)
+%BLENDPYRAMID blend the pyramid based on selected bg fg and mask.
+%   Calculates the Laplacian Pyramids of images and Gaussian Pyramid of the
+%   mask and does alpha blending to get the blended pyramid. Then collapses
+%   the pyramid to recover the blended image. 
+    [~, lPyrBG] = ComputePyr(bg, nlayers); %calculate laplacian pyr of 1st img
+    [~, lPyrFG] = ComputePyr(fg, nlayers); %calculate laplacian pyr of 2nd img
+    [gPyrMask,~] = ComputePyr(double(bw_mask), nlayers); %gaussian pyr of mask
     for i = 1:length(gPyrMask)
-        lblend{i} = uint8(gPyrMask{i}) .* lPyrBG{i} + (1-uint8(gPyrMask{i})).*lPyrFG{i};
+        %calculate blended pyramid based on alpha blending with mask gpyr
+        lblend{i} = (gPyrMask{i}) .* lPyrBG{i} + (1-(gPyrMask{i})).*lPyrFG{i};
     end
     layer = length(lblend);
-    blendedImg = uint8(zeros(size(lblend{1})));
+    %generate gaussian kernel 
+    dscale = 2.5; 
+    sigm = (2*dscale)./6;
+    kernS = floor(4*sigm+0.5);
+    h = fspecial('gaussian', kernS ,sigm);
+%     h = ([1;4;6;4;1]*[1 4 6 4 1])./256; % can be implemented as separable
+%     filter as shown 
+
+    %collapse pyramid 
     while(layer>1)
-        lblend{layer-1} = upscale(lblend{layer}, size(lblend{layer-1}))+lblend{layer-1};
+        lblend{layer-1} = conv2d(upscale(lblend{layer}, size(lblend{layer-1})),h,3)+lblend{layer-1};
         layer = layer-1;
     end
     blendedImg = lblend{1};

@@ -64,29 +64,55 @@ elseif (mod(rk,2) && mod(ck,2)) %for odd sized kernels. (3x3, 5x5...)
         img_pad = zeros(r+2*floor(rk/2),c+2*floor(ck/2));
         img_pad(ceil(rk/2):end-floor(rk/2), ceil(ck/2):end-floor(ck/2)) = img;
         %wrap edges from other end to the newly added edges
-        img_pad(floor((rk+1)/2):end-floor(rk/2), 1:floor(ck/2)) = img(:,end-floor(ck/2)+1:end);
-        img_pad(floor((rk+1)/2):end-floor(rk/2), end-floor(ck/2)+1:end) = img(:,1:floor(ck/2));
-        img_pad(1:floor(rk/2),floor((ck+1)/2):end-floor(ck/2)) = img(end-floor(rk/2)+1:end,:); 
-        img_pad(end-floor(rk/2)+1:end,floor((ck+1)/2):end-floor(ck/2)) = img(1:floor(rk/2),:);
+        try
+            img_pad(floor((rk+1)/2):end-floor(rk/2), 1:floor(ck/2)) = img(:,end-floor(ck/2)+1:end);
+            img_pad(floor((rk+1)/2):end-floor(rk/2), end-floor(ck/2)+1:end) = img(:,1:floor(ck/2));
+            img_pad(1:floor(rk/2),floor((ck+1)/2):end-floor(ck/2)) = img(end-floor(rk/2)+1:end,:); 
+            img_pad(end-floor(rk/2)+1:end,floor((ck+1)/2):end-floor(ck/2)) = img(1:floor(rk/2),:);
+            %corner cases
+            img_pad(1:floor(rk/2), 1:floor(ck/2)) = img(end-floor(rk/2)+1:end, end-floor(ck/2)+1:end);
+            img_pad(end-floor(rk/2)+1:end, 1:floor(ck/2)) = img(1:floor(rk/2), end-floor(ck/2)+1:end);
+            img_pad(1:floor(rk/2), end-floor(ck/2)+1:end) = img(end-floor(rk/2)+1:end, 1:floor(ck/2));
+            img_pad(end-floor(rk/2)+1:end, end-floor(ck/2)+1:end) = img(1:floor(rk/2), 1:floor(ck/2));
+        catch
+        end
+        %copy edges to the newly added edges
+        img_pad(ceil(rk/2):end-floor(rk/2), 1:floor(ck/2)) = repmat(img(:,1),1,floor(ck/2)); 
+        img_pad(ceil(rk/2):end-floor(rk/2), end-floor(ck/2)+1:end) = repmat(img(:,end),1,floor(rk/2));
+        img_pad(1:floor(rk/2),ceil(ck/2):end-floor(ck/2)) = repmat(img(1,:),floor(rk/2),1);
+        img_pad(end-floor(rk/2)+1:end,ceil(ck/2):end-floor(ck/2)) = repmat(img(end,:),floor(ck/2),1);
         %corner cases
-        img_pad(1:floor(rk/2), 1:floor(ck/2)) = img(end-floor(rk/2)+1:end, end-floor(ck/2)+1:end);
-        img_pad(end-floor(rk/2)+1:end, 1:floor(ck/2)) = img(1:floor(rk/2), end-floor(ck/2)+1:end);
-        img_pad(1:floor(rk/2), end-floor(ck/2)+1:end) = img(end-floor(rk/2)+1:end, 1:floor(ck/2));
-        img_pad(end-floor(rk/2)+1:end, end-floor(ck/2)+1:end) = img(1:floor(rk/2), 1:floor(ck/2));
+        img_pad(1:floor(rk/2), 1:floor(ck/2)) = repmat(img(1,1), floor(rk/2), floor(ck/2));
+        img_pad(end-floor(rk/2)+1:end, 1:floor(ck/2)) = repmat(img(end,1), floor(rk/2), floor(ck/2));
+        img_pad(1:floor(rk/2), end-floor(ck/2)+1:end) = repmat(img(1,end), floor(rk/2), floor(ck/2));
+        img_pad(end-floor(rk/2)+1:end, end-floor(ck/2)+1:end) = repmat(img(end,end), floor(rk/2), floor(ck/2));
     elseif pad == 4 %reflect across edge
         %set up as zero padding 
         img_pad = zeros(r+2*floor(rk/2),c+2*floor(ck/2));
         img_pad(ceil(rk/2):end-floor(rk/2), ceil(ck/2):end-floor(ck/2)) = img;
-        %reflect across edges
-        img_pad(floor((rk+1)/2):end-floor(rk/2), 1:floor(ck/2)) = img(:,floor(ck/2):-1:1);
-        img_pad(floor((rk+1)/2):end-floor(rk/2), end-floor(ck/2)+1:end) = img(:,end:-1:end-floor(ck/2)+1);
-        img_pad(1:floor(rk/2),floor((ck+1)/2):end-floor(ck/2)) = img(floor(rk/2):-1:1,:);
-        img_pad(end-floor(rk/2)+1:end,floor((ck+1)/2):end-floor(ck/2)) = img(end:-1:end-floor(rk/2)+1,:);
-        %corner cases
-        img_pad(1:floor(rk/2), 1:floor(ck/2)) = img(floor(rk/2):-1:1, floor(ck/2):-1:1);
-        img_pad(end-floor(rk/2)+1:end, 1:floor(ck/2)) = img(end:-1:end-floor(rk/2)+1, floor(ck/2):-1:1);
-        img_pad(1:floor(rk/2), end-floor(ck/2)+1:end) = img(floor(rk/2):-1:1, end:-1:end-floor(ck/2)+1);
-        img_pad(end-floor(rk/2)+1:end, end-floor(ck/2)+1:end) = img(end:-1:end-floor(rk/2)+1, end:-1:end-floor(ck/2)+1);
+        try
+            %reflect across edges
+            img_pad(floor((rk+1)/2):end-floor(rk/2), 1:floor(ck/2)) = img(:,floor(ck/2):-1:1);
+            img_pad(floor((rk+1)/2):end-floor(rk/2), end-floor(ck/2)+1:end) = img(:,end:-1:end-floor(ck/2)+1);
+            img_pad(1:floor(rk/2),floor((ck+1)/2):end-floor(ck/2)) = img(floor(rk/2):-1:1,:);
+            img_pad(end-floor(rk/2)+1:end,floor((ck+1)/2):end-floor(ck/2)) = img(end:-1:end-floor(rk/2)+1,:);
+            %corner cases
+            img_pad(1:floor(rk/2), 1:floor(ck/2)) = img(floor(rk/2):-1:1, floor(ck/2):-1:1);
+            img_pad(end-floor(rk/2)+1:end, 1:floor(ck/2)) = img(end:-1:end-floor(rk/2)+1, floor(ck/2):-1:1);
+            img_pad(1:floor(rk/2), end-floor(ck/2)+1:end) = img(floor(rk/2):-1:1, end:-1:end-floor(ck/2)+1);
+            img_pad(end-floor(rk/2)+1:end, end-floor(ck/2)+1:end) = img(end:-1:end-floor(rk/2)+1, end:-1:end-floor(ck/2)+1);
+        catch
+            %copy edges to the newly added edges
+            img_pad(ceil(rk/2):end-floor(rk/2), 1:floor(ck/2)) = repmat(img(:,1),1,floor(ck/2)); 
+            img_pad(ceil(rk/2):end-floor(rk/2), end-floor(ck/2)+1:end) = repmat(img(:,end),1,floor(rk/2));
+            img_pad(1:floor(rk/2),ceil(ck/2):end-floor(ck/2)) = repmat(img(1,:),floor(rk/2),1);
+            img_pad(end-floor(rk/2)+1:end,ceil(ck/2):end-floor(ck/2)) = repmat(img(end,:),floor(ck/2),1);
+            %corner cases
+            img_pad(1:floor(rk/2), 1:floor(ck/2)) = repmat(img(1,1), floor(rk/2), floor(ck/2));
+            img_pad(end-floor(rk/2)+1:end, 1:floor(ck/2)) = repmat(img(end,1), floor(rk/2), floor(ck/2));
+            img_pad(1:floor(rk/2), end-floor(ck/2)+1:end) = repmat(img(1,end), floor(rk/2), floor(ck/2));
+            img_pad(end-floor(rk/2)+1:end, end-floor(ck/2)+1:end) = repmat(img(end,end), floor(rk/2), floor(ck/2));
+        end
     end
 else %for even sized kernels (eg. 2x2, 4x4...) 
     if pad == 1 %zero padding
