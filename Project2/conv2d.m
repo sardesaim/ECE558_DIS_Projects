@@ -29,8 +29,13 @@ function [op_img] = conv2d(img,kern, pad)
             end
         end
     else %for odd sized kernels (3x3, 5x5...)
+<<<<<<< HEAD
         for i = ceil(rk/2):r+1
             for j = ceil(ck/2):c+1
+=======
+        for i = 2:r+1
+            for j = 2:c+1
+>>>>>>> c26e8f1896b5b70ea31c86ff97d6141df9f19f48
                 for k = -floor(rk/2):floor(rk/2)
                     for l = -floor(ck/2):floor(ck/2)
                         su(k+ceil(rk/2),l+ceil(ck/2)) = img_pad(i+k,j+l).*kern(k+ceil(rk/2),l+ceil(ck/2));
