@@ -22,14 +22,35 @@ function [fgo, roi, bw_mask1] = createROIMask(fg, bg, roitype)
     elseif(rf*cf<rb*cb)
         fgo = zeros(rb,cb,bch);
         bw_mask1 = zeros(rb,cb);
-        % center the smaller fg and its mask by zero padding to bg size 
-        fgo(floor(rb/2)+(1:rf)-floor(rf/2), floor(cb/2)+(1:cf)-floor ...
-            (cf/2),:) = fg;
-        bw_mask1(floor(rb/2)+(1:rf)-floor(rf/2), floor(cb/2)+(1:cf)- ...
-            floor(cf/2)) = bw_mask;
+        if rf<rb && cf<cb
+            % center the smaller fg and its mask by zero padding to bg size 
+            fgo(floor(rb/2)+(1:rf)-floor(rf/2), floor(cb/2)+(1:cf)-floor ...
+                (cf/2),:) = fg;
+            bw_mask1(floor(rb/2)+(1:rf)-floor(rf/2), floor(cb/2)+(1:cf)- ...
+                floor(cf/2)) = bw_mask;
+        elseif rf<rb && cf>cb
+            fac = 1-((cf-cb)/cb);
+            fg = downscale(fg,fac);
+            bw_mask = downscale(bw_mask,fac);
+            [rf, cf, fch] = size(fg);
+            % center the smaller fg and its mask by zero padding to bg size 
+            fgo(floor(rb/2)+(1:rf)-floor(rf/2), floor(cb/2)+(1:cf)-floor ...
+                (cf/2),:) = fg;
+            bw_mask1(floor(rb/2)+(1:rf)-floor(rf/2), floor(cb/2)+(1:cf)- ...
+                floor(cf/2)) = bw_mask;
+        elseif rf>rb && cf<cb
+            fac = 1-((rf-rb)/rb);
+            fg = downscale(fg,fac);
+            bw_mask = downscale(bw_mask,fac);
+            [rf, cf, fch] = size(fg);
+            % center the smaller fg and its mask by zero padding to bg size 
+            fgo(floor(rb/2)+(1:rf)-floor(rf/2), floor(cb/2)+(1:cf)-floor ...
+                (cf/2),:) = fg;
+            bw_mask1(floor(rb/2)+(1:rf)-floor(rf/2), floor(cb/2)+(1:cf)- ...
+                floor(cf/2)) = bw_mask;
+        end
     else
         fgo = fg;
         bw_mask1 = bw_mask;
     end
 end
-
