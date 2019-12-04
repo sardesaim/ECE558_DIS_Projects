@@ -5,7 +5,7 @@ grayImg = im2double(rgb2gray(image));
 sigma=1.4; %1.4 dinesh
 k=sqrt(2);
 octaves = 1;
-intervals = 10;
+intervals = 16;
 % for oct = 1:octaves
 %     [rows,columns]=size(grayImg);
 %     l = cell(oct,1);
@@ -64,8 +64,8 @@ for oct = 1:octaves
 %         catch
 %             continue
 %         end
-        figure;
-        imshow(l{oct}(:,:,i));
+%         figure;
+%         imshow(l{oct}(:,:,i));
         sigma_op=sigma*(k^i);
     end
     sigma_oct = sigma*(2^oct);
@@ -77,7 +77,7 @@ possible_maximas = [];
 max_res = zeros(size(l{oct},1), size(l{oct},2),intervals+1);
 for i = 1:intervals+1
     currImg = l{oct}(:,:,i);
-    threshold = 0.001;
+    threshold = 0.00075;
     mask_size = 5;
     mx = ordfilt2(l{oct}(:,:,i), mask_size^2, ones(mask_size));   
     max_res(:,:,i) = (l{oct}(:,:,i)==mx)&(l{oct}(:,:,i)>threshold);
@@ -122,13 +122,13 @@ for intr = 2:intervals
     end
 end
 
-for intr = 1:intervals
-    figure(intr);
-    subplot(211);
-    imagesc(l{oct}(:,:,intr));
-    subplot(212)
-    imagesc(max_res(:,:,intr));
-end
+% for intr = 1:intervals
+%     figure(intr);
+%     subplot(211);
+%     imagesc(l{oct}(:,:,intr));
+%     subplot(212)
+%     imagesc(max_res(:,:,intr));
+% end
 figure(intr+1)
 imshow(rgb2gray(image)); hold on;
 for i = 1:length(max_x)

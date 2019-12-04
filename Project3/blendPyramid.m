@@ -21,7 +21,8 @@ function [blendedImg] = blendPyramid(bg, fg, bw_mask, nlayers)
 
     %collapse pyramid 
     while(layer>1)
-        lblend{layer-1} = conv2d(upscale(lblend{layer}, size(lblend{layer-1})),h,3)+lblend{layer-1};
+%         lblend{layer-1} = conv2d(upscale(lblend{layer}, size(lblend{layer-1})),h,3)+lblend{layer-1};
+        lblend{layer-1} = convfreq(upscale(lblend{layer}, size(lblend{layer-1})),h)+lblend{layer-1};
         layer = layer-1;
     end
     blendedImg = lblend{1};
