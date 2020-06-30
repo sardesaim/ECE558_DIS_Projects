@@ -1,3 +1,2 @@
-Projects done as a part of ECE558 - Digital Imaging Systems 
-
-Projects done on MATLAB/ Python.  
+Image Processing Projects. 
+Done on MATLAB/ Python.  
